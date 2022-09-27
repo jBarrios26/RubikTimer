@@ -13,10 +13,17 @@
   --secondary: #fedcc1;
   --on-primary: #212529;
   --on-secondary: #212529;
-  --secong-bg-color: #343a40;
+  --second-bg-color: #343a40;
   --card-bg: #495057;
   --light-bg: #6c757d;
 
   font-family: Poppins, sans-serif;
+  font-size: 20px;
+  color: white;
   background-color: var(--background-color);
+}
+
+body {
+  padding: 0;
+  margin: 0;
 }
