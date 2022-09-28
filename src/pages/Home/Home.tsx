@@ -4,10 +4,10 @@ import { Timer } from '../Timer';
 
 const Home: React.FC = () => {
   return (
-    <>
+    <div style={{ display: 'flex', flexDirection: 'column' }}>
       <NavBar></NavBar>
       <Timer></Timer>
-    </>
+    </div>
   );
 };
 
