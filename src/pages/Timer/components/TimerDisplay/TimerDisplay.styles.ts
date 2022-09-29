@@ -48,7 +48,22 @@ export const Segments = styled.span`
   }
 `;
 
-export const Stats = styled.div`
-  font-size: 16px;
+export const AvgOfFive = styled.div`
+  font-size: 32px;
   color: white;
+
+  cursor: pointer;
+
+  :hover {
+    color: var(--blue);
+  }
+`;
+
+export const AvgOfTwelve = styled.div`
+  font-size: 32px;
+  color: white;
+  cursor: pointer;
+  :hover {
+    color: var(--blue);
+  }
 `;

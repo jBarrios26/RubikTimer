@@ -1,5 +1,5 @@
 import React from 'react';
-import { Stats } from './TimerDisplay.styles';
+import { AvgOfFive, AvgOfTwelve } from './TimerDisplay.styles';
 import {
   Scramble,
   Segments,
@@ -20,9 +20,8 @@ const TimerDisplay: React.FC = () => {
 
       <TimerSegments>
         <Segments>12:11:11</Segments>
-        <Stats>
-          5-avg: 12:11 <br /> 12-avg: 13:11
-        </Stats>
+        <AvgOfFive>5-avg: 12:11</AvgOfFive>
+        <AvgOfTwelve>12-avg: 13:11</AvgOfTwelve>
       </TimerSegments>
     </TimerDisplayContainer>
   );
