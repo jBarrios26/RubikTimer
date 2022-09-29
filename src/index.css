@@ -17,6 +17,7 @@
   --card-bg: #495057;
   --light-bg: #6c757d;
 
+  box-sizing: border-box;
   font-family: Poppins, sans-serif;
   font-size: 20px;
   color: white;
@@ -24,6 +25,16 @@
 }
 
 body {
+  display: flex;
+  flex-direction: column;
+  min-width: 320px;
+  min-height: 100vh;
   padding: 0;
   margin: 0;
+}
+
+@font-face {
+  font-family: SevenSegments;
+  src: local('SevenSegments'),
+    url('@/assets/fonts/SevenSegment.ttf') format('truetype');
 }
