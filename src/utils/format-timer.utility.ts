@@ -15,8 +15,14 @@ export const formatSeconds = (seconds: number): string => {
 
 export const formatMiliseconds = (miliseconds: number, isRunning: boolean) => {
   if (miliseconds !== 0 || isRunning) {
-    if (isRunning) return `${(miliseconds / 100).toString().padStart(1, '0')}`;
-    else return `${(miliseconds / 10).toString().padStart(2, '0')}`;
+    if (isRunning)
+      return `${Math.floor(miliseconds / 100)
+        .toString()
+        .padStart(1, '0')}`;
+    else
+      return `${Math.floor(miliseconds / 100)
+        .toString()
+        .padStart(2, '0')}`;
   } else {
     return `00`;
   }

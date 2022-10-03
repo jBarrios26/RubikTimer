@@ -17,15 +17,17 @@ export const Scramble = styled.div`
   justify-content: center;
   align-items: center;
 
+  padding-top: 3em;
+
   > h1 {
     text-align: center;
     font-size: 24px;
     margin: 20px 10%;
     @media screen and (min-width: 700px) {
-      font-size: 32px;
+      font-size: 36px;
     }
     @media screen and (min-width: 1100px) {
-      font-size: 36px;
+      font-size: 48px;
     }
   }
 `;

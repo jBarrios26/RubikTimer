@@ -13,12 +13,15 @@ import {
 } from '../../../../utils/format-timer.utility';
 import useInterval from '../../../../hooks/use_interval';
 
+import { randomScrambleForEvent } from 'cubing/scramble';
+
 import {
   Scramble,
   Segments,
   TimerDisplayContainer,
   TimerSegments,
 } from './TimerDisplay.styles';
+import { useAsync, useAsyncCallback } from 'react-async-hook';
 
 export interface TimerDisplayState {
   phase: TimerPhase;
@@ -58,20 +61,25 @@ const TimerDisplay: React.FC = () => {
   const [readyTimer, setReadyTimer] = useState(false);
   const [timerRunning, setTimerRunning] = useState(false);
 
-  const readyTimerInterval = useInterval(
+  const scramble = useAsync(
+    async () => await randomScrambleForEvent('333'),
+    []
+  );
+
+  useInterval(
     () => {
       if (timerState.phase !== TimerPhase.idle) {
         setTimerState({ ...timerState, phase: TimerPhase.ready });
         setReadyTimer(false);
       }
     },
-    readyTimer ? 1000 : null
+    readyTimer ? 500 : null
   );
 
-  const timer = useInterval(
+  useInterval(
     () => {
       setTimerState((previousTimerState) => {
-        const newTotalMiliseconds = previousTimerState.totalMiliseconds + 100;
+        const newTotalMiliseconds = previousTimerState.totalMiliseconds + 10;
         const minutesPassed = Math.floor(newTotalMiliseconds / 60000);
         const secondsPassed = Math.floor(
           (newTotalMiliseconds - minutesPassed * 60000) / 1000
@@ -95,7 +103,7 @@ const TimerDisplay: React.FC = () => {
         };
       });
     },
-    timerRunning ? 100 : null
+    timerRunning ? 10 : null
   );
 
   useEffect(() => {
@@ -103,10 +111,15 @@ const TimerDisplay: React.FC = () => {
       if (keyboardEvent.code !== 'Space') return;
 
       if (timerState.phase === TimerPhase.idle) {
-        setTimerState({ ...timerState, phase: TimerPhase.holding });
+        setTimerState({
+          ...timerState,
+          phase: TimerPhase.holding,
+        });
         setReadyTimer(true);
       } else if (timerState.phase === TimerPhase.solving) {
         setTimerRunning(false);
+        setTimerState({ ...timerState, phase: TimerPhase.idle });
+        void scramble.execute();
       }
     }
 
@@ -114,7 +127,14 @@ const TimerDisplay: React.FC = () => {
       if (keyboardEvent.code !== 'Space') return;
 
       if (timerState.phase === TimerPhase.ready) {
-        setTimerState({ ...timerState, phase: TimerPhase.solving });
+        setTimerState({
+          ...timerState,
+          phase: TimerPhase.solving,
+          miliseconds: 0,
+          totalMiliseconds: 0,
+          minute: 0,
+          seconds: 0,
+        });
         setTimerRunning(true);
       } else if (timerState.phase == TimerPhase.holding) {
         setTimerState({ ...timerState, phase: TimerPhase.idle });
@@ -128,16 +148,12 @@ const TimerDisplay: React.FC = () => {
       document.removeEventListener('keydown', handleKeyDown);
       document.removeEventListener('keyup', handleKeyUp);
     };
-  }, [timerState]);
+  }, [timerState, scramble]);
 
   return (
     <TimerDisplayContainer>
       <Scramble>
-        <h1>
-          {
-            "F2 L B' U' L2 U2 L' R F D U' L' R2 U B' F D' U R' D2 B' D' U L R' B' L2 B2 D2 B' "
-          }
-        </h1>
+        <h1> {scramble.loading ? ' ' : scramble.result?.toString()}</h1>
       </Scramble>
 
       <TimerSegments>
