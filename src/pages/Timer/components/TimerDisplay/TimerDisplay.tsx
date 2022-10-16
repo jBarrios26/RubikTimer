@@ -22,9 +22,6 @@ import {
   TimerSegments,
 } from './TimerDisplay.styles';
 import { useAsync, useAsyncCallback } from 'react-async-hook';
-import { useDispatch } from 'react-redux';
-import { setNewScramble } from '../../../../redux/states/timer';
-import { CubeType } from '../../../../models/timer/scramble';
 
 export interface TimerDisplayState {
   phase: TimerPhase;
@@ -64,18 +61,10 @@ const TimerDisplay: React.FC = () => {
   const [readyTimer, setReadyTimer] = useState(false);
   const [timerRunning, setTimerRunning] = useState(false);
 
-  const dispatch = useDispatch();
-
-  const scramble = useAsync(async () => {
-    const generateScramble = await randomScrambleForEvent('333');
-    dispatch(
-      setNewScramble({
-        scramble: generateScramble.toString(),
-        cubeType: CubeType.threeByThree,
-      })
-    );
-    return generateScramble;
-  }, []);
+  const scramble = useAsync(
+    async () => await randomScrambleForEvent('333'),
+    []
+  );
 
   useInterval(
     () => {
