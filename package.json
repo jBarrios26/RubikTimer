@@ -12,8 +12,12 @@
   },
   "dependencies": {
     "@types/node": "^18.7.23",
+    "@types/react-redux": "^7.1.24",
+    "cubing": "^0.30.0",
     "react": "^18.2.0",
+    "react-async-hook": "^4.0.0",
     "react-dom": "^18.2.0",
+    "react-redux": "^8.0.4",
     "seven-segment-display": "^0.2.0",
     "styled-components": "^5.3.5"
   },
