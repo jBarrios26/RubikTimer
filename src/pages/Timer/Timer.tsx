@@ -1,7 +1,6 @@
 import React from 'react';
 import { TimerContainer, TimerSpace, TimerUtilities } from './Timer.styles';
 import TimerDisplay from './components/TimerDisplay/TimerDisplay';
-import { ScrambleSection } from './components';
 
 const Timer: React.FC = () => {
   return (
@@ -9,9 +8,7 @@ const Timer: React.FC = () => {
       <TimerSpace>
         <TimerDisplay />
       </TimerSpace>
-      <TimerUtilities>
-        <ScrambleSection></ScrambleSection> <div style={{ flexGrow: 1 }}></div>
-      </TimerUtilities>
+      <TimerUtilities>Mundo</TimerUtilities>
     </TimerContainer>
   );
 };
