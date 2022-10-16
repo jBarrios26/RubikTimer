@@ -1,26 +1,31 @@
 import styled from 'styled-components';
 
 export const TimerContainer = styled.main`
-  display: grid;
   gap: 1rem;
+  display: flex;
+  flex-direction: column;
   min-width: 100%;
   max-width: 85em;
   margin-inline: auto;
   align-items: stretch;
   min-height: calc(100vh - 70px);
 
-  @media (min-width: 700px) {
+  @media (min-width: 900px) {
+    display: grid;
+    min-height: calc(100vh - 70px);
     grid-template-columns: 1fr 35%;
   }
 `;
 
 export const TimerSpace = styled.div`
   width: 100%;
+  min-height: calc(100vh - 70px);
 `;
 
 export const TimerUtilities = styled.div`
   width: 100%;
-  height: 100%;
+  min-height: calc(100vh - 70px);
 
-  background-color: var(--green);
+  display: flex;
+  flex-direction: column;
 `;
