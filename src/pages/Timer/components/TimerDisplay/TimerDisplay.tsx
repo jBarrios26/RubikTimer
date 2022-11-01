@@ -21,10 +21,21 @@ import {
   TimerDisplayContainer,
   TimerSegments,
 } from './TimerDisplay.styles';
-import { useAsync, useAsyncCallback } from 'react-async-hook';
+import { useAsync } from 'react-async-hook';
 import { useDispatch } from 'react-redux';
-import { setNewScramble } from '../../../../redux/states/timer';
+import timer, {
+  addNewSolve,
+  setNewScramble,
+} from '../../../../redux/states/timer';
 import { CubeType } from '../../../../models/timer/scramble';
+import { useSelector } from 'react-redux';
+import { AppStore } from '../../../../redux/store';
+import Solve from '../../../../models/timer/solve';
+import { removeEdgeTimes } from '../../../../utils/remove_edge_times';
+import { assert } from 'console';
+import useDownKey from '../../../../hooks/use_downkey';
+import useUpKey from '../../../../hooks/use_upkey';
+import db from '../../../../data/db';
 
 export interface TimerDisplayState {
   phase: TimerPhase;
@@ -63,7 +74,7 @@ const TimerDisplay: React.FC = () => {
 
   const [readyTimer, setReadyTimer] = useState(false);
   const [timerRunning, setTimerRunning] = useState(false);
-
+  const timerGlobalState = useSelector((state: AppStore) => state.timer);
   const dispatch = useDispatch();
 
   const scramble = useAsync(async () => {
@@ -87,6 +98,112 @@ const TimerDisplay: React.FC = () => {
     readyTimer ? 500 : null
   );
 
+  function processSolve(): void {
+    const lastSolve: Solve = {
+      time: timerState.totalMiliseconds,
+      isDNF: false,
+      hasPenalty: false,
+      scramble: timerGlobalState.currentScramble,
+      id: timerGlobalState.currentScramble.scramble,
+      correlative: timerGlobalState.previousSolves.length + 1,
+    };
+
+    let newAvgOfFive = -3000 * 100;
+    let newAvgOfTwelve = -3000 * 100;
+    let newAvgOfThree = -3000 * 100;
+
+    if (timerGlobalState.previousSolves.length >= 2) {
+      const solves = timerGlobalState.previousSolves.slice(
+        timerGlobalState.previousSolves.length - 2,
+        timerGlobalState.previousSolves.length
+      );
+
+      if (solves.filter((solve) => solve.isDNF).length <= 1) {
+        solves.push(lastSolve);
+        newAvgOfThree =
+          solves
+            .map((solve) => solve.time)
+            .reduce((totalTime, time) => totalTime + time, 0) / 3;
+      }
+    }
+
+    if (timerGlobalState.previousSolves.length >= 4) {
+      const solves = timerGlobalState.previousSolves.slice(
+        timerGlobalState.previousSolves.length - 4,
+        timerGlobalState.previousSolves.length
+      );
+      if (solves.filter((solve) => solve.isDNF).length <= 1) {
+        solves.push(lastSolve);
+        const solvesToCalculateMean = removeEdgeTimes(solves);
+        newAvgOfFive =
+          solvesToCalculateMean
+            .map((solve) => solve.time)
+            .reduce((totalTime, time) => totalTime + time, 0) / 3;
+      }
+    }
+
+    if (timerGlobalState.previousSolves.length >= 11) {
+      const solves = timerGlobalState.previousSolves.slice(
+        timerGlobalState.previousSolves.length - 11,
+        timerGlobalState.previousSolves.length
+      );
+      if (solves.filter((solve) => solve.isDNF).length <= 1) {
+        solves.push(lastSolve);
+        const solvesToCalculateMean = removeEdgeTimes(solves);
+        newAvgOfTwelve =
+          solvesToCalculateMean
+            .map((solve) => solve.time)
+            .reduce((totalTime, time) => totalTime + time, 0) / 11;
+      }
+    }
+
+    const bestTime: number =
+      timerGlobalState.bestTime > timerState.totalMiliseconds ||
+      timerGlobalState.bestTime < 0
+        ? timerState.totalMiliseconds
+        : -3000 * 100;
+
+    const bestAvgOfFive: number =
+      (timerGlobalState.bestAvgOfFive > newAvgOfFive && newAvgOfFive > 0) ||
+      timerGlobalState.bestAvgOfFive < 0
+        ? newAvgOfFive
+        : -3000 * 100;
+    const bestAvgOfTwelve: number =
+      (timerGlobalState.bestAvgOfTwelve > newAvgOfTwelve &&
+        newAvgOfTwelve > 0) ||
+      timerGlobalState.bestAvgOfTwelve < 0
+        ? newAvgOfTwelve
+        : -3000 * 100;
+
+    void db.session.update(timerGlobalState.id, {
+      rubikSession: {
+        id: timerGlobalState.id,
+        currentScramble: timerGlobalState.currentScramble,
+        previousSolves: [...timerGlobalState.previousSolves, lastSolve],
+        avgOfFive: newAvgOfFive,
+        avgOfTwelve: newAvgOfTwelve,
+        avgOfThree: newAvgOfThree,
+        bestAvgOfFive: bestAvgOfFive,
+        bestAvgOfTwelve: bestAvgOfTwelve,
+        bestTime: bestTime,
+        lastTime: lastSolve,
+      },
+    });
+
+    dispatch(
+      addNewSolve({
+        previousSolves: [...timerGlobalState.previousSolves, lastSolve],
+        avgOfFive: newAvgOfFive,
+        avgOfTwelve: newAvgOfTwelve,
+        avgOfThree: newAvgOfThree,
+        bestAvgOfFive: bestAvgOfFive,
+        bestAvgOfTwelve: bestAvgOfTwelve,
+        bestTime: bestTime,
+        lastTime: lastSolve,
+      })
+    );
+  }
+
   useInterval(
     () => {
       setTimerState((previousTimerState) => {
@@ -97,13 +214,6 @@ const TimerDisplay: React.FC = () => {
         );
         const milisecondsPassed =
           newTotalMiliseconds - minutesPassed * 60000 - secondsPassed * 1000;
-
-        console.log(
-          newTotalMiliseconds,
-          minutesPassed,
-          secondsPassed,
-          milisecondsPassed
-        );
 
         return {
           ...timerState,
@@ -116,50 +226,43 @@ const TimerDisplay: React.FC = () => {
     },
     timerRunning ? 10 : null
   );
+  function handleKeyDown(keyboardEvent: KeyboardEvent) {
+    if (keyboardEvent.code !== 'Space') return;
 
-  useEffect(() => {
-    function handleKeyDown(keyboardEvent: KeyboardEvent) {
-      if (keyboardEvent.code !== 'Space') return;
-
-      if (timerState.phase === TimerPhase.idle) {
-        setTimerState({
-          ...timerState,
-          phase: TimerPhase.holding,
-        });
-        setReadyTimer(true);
-      } else if (timerState.phase === TimerPhase.solving) {
-        setTimerRunning(false);
-        setTimerState({ ...timerState, phase: TimerPhase.idle });
-        void scramble.execute();
-      }
+    if (timerState.phase === TimerPhase.idle) {
+      setTimerState({
+        ...timerState,
+        phase: TimerPhase.holding,
+      });
+      setReadyTimer(true);
+    } else if (timerState.phase === TimerPhase.solving) {
+      console.log(timerState.totalMiliseconds);
+      setTimerRunning(false);
+      setTimerState({ ...timerState, phase: TimerPhase.idle });
+      processSolve();
+      void scramble.execute();
     }
+  }
 
-    function handleKeyUp(keyboardEvent: KeyboardEvent) {
-      if (keyboardEvent.code !== 'Space') return;
+  function handleKeyUp(keyboardEvent: KeyboardEvent) {
+    if (keyboardEvent.code !== 'Space') return;
 
-      if (timerState.phase === TimerPhase.ready) {
-        setTimerState({
-          ...timerState,
-          phase: TimerPhase.solving,
-          miliseconds: 0,
-          totalMiliseconds: 0,
-          minute: 0,
-          seconds: 0,
-        });
-        setTimerRunning(true);
-      } else if (timerState.phase == TimerPhase.holding) {
-        setTimerState({ ...timerState, phase: TimerPhase.idle });
-      }
+    if (timerState.phase === TimerPhase.ready) {
+      setTimerState({
+        ...timerState,
+        phase: TimerPhase.solving,
+        miliseconds: 0,
+        totalMiliseconds: 0,
+        minute: 0,
+        seconds: 0,
+      });
+      setTimerRunning(true);
+    } else if (timerState.phase == TimerPhase.holding) {
+      setTimerState({ ...timerState, phase: TimerPhase.idle });
     }
-
-    document.addEventListener('keydown', handleKeyDown);
-    document.addEventListener('keyup', handleKeyUp);
-
-    return function cleanup() {
-      document.removeEventListener('keydown', handleKeyDown);
-      document.removeEventListener('keyup', handleKeyUp);
-    };
-  }, [timerState, scramble]);
+  }
+  useDownKey(handleKeyDown);
+  useUpKey(handleKeyUp);
 
   return (
     <TimerDisplayContainer>
