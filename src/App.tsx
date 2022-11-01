@@ -1,7 +1,7 @@
 import React from 'react';
 import './App.css';
+import db from './data/db';
 import Home from './pages/Home/Home';
-import { threeCube } from './models/cube/cube';
 
 function App() {
   return (
