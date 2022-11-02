@@ -15,7 +15,8 @@ export const ScrambleSectionCard = styled.div`
   margin: 5px 15px;
   padding: 5px 5px;
   height: 100%;
-  flex: 1 0 0px;
+
+  flex: 1;
   display: flex;
   flex-direction: column;
 `;
