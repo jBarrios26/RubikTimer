@@ -1,11 +1,19 @@
 import styled from 'styled-components';
+export interface StatTableProps {
+  width?: number;
+}
+
 export const TimeListCard = styled.div`
   background-color: var(--card-bg);
   color: white;
   border-radius: 12px;
   margin: 5px 15px;
-  padding: 5px 5px;
+  padding: 15px 10px;
   flex: 1;
+  display: flex;
+  min-height: calc(50vh - 65px);
+  max-height: calc(50vh - 65px);
+  flex-direction: column;
 `;
 
 export const StatsSection = styled.div`
@@ -22,21 +30,23 @@ export const Stat = styled.div`
   justify-content: center;
   align-items: center;
   border-radius: 20px;
+  font-size: 1em;
   padding: 0.5em;
 `;
 
 export const TableWrapper = styled.div`
   overflow: hidden;
   overflow-y: scroll;
-  max-height: calc((100vh - 65px) / 2);
+  margin: 10px 10px;
+  border-radius: 1em;
 `;
 
 export const StatTable = styled.table`
+  table-layout: fixed;
+  width: 100%;
   caption-side: top;
-  border: none;
-  border-collapse: collapse;
-  /* border-collapse: separate; */
-  /* border-spacing: 5px 10px; */
+  border-collapse: separate;
+  border-spacing: 0px;
 
   caption-side: bottom;
   /* empty-cell: show | hide;  */
@@ -45,21 +55,25 @@ export const StatTable = styled.table`
   /* vertical-align: baseline | sub | super | text-top | 
                 text-bottom | middle | top | bottom | 
                 <percentage> | <length> */
+  vertical-align: middle;
 
-  td,
-  th {
-    border: none;
+  tfoot {
+    position: sticky;
+    bottom: 0;
+    z-index: 1;
   }
-  /* td,
-  th {
-    border: 1px solid;
-  } */
+
+  thead {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+  }
 
   td {
     padding: 5px 10px;
   }
 
-  tbody tr {
+  tbody > tr {
     :nth-of-type(odd) {
       background-color: #efefef;
     }
@@ -67,13 +81,41 @@ export const StatTable = styled.table`
       background-color: lightpink;
     }
   }
-  thead > tr {
-    background-color: #c2c2c2;
-  }
+
   caption {
     font-size: 0.9em;
     padding: 5px;
     color: white;
     font-weight: bold;
   }
+`;
+
+export const TableHeaderRow = styled.tr`
+  border-radius: 20px 20px 0 0;
+  border: 50px solid red;
+  th:last-child {
+    border-radius: 0 20px 0 0;
+  }
+  th:first-child {
+    border-radius: 20px 0 0 0;
+  }
+`;
+
+export const TableStatHeader = styled.th<StatTableProps>`
+  font-size: 24px;
+  border: 3px solid white;
+  text-align: center;
+  font-weight: bold;
+  width: ${(props) => {
+    return `${(props.width ?? 21).toString()}%`;
+  }};
+`;
+
+export const TableStat = styled.td<StatTableProps>`
+  text-align: center;
+  font-size: 20px;
+  border: 1px solid white;
+  width: ${(props) => {
+    return `${(props.width ?? 21).toString()}%`;
+  }};
 `;
