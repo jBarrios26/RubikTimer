@@ -11,6 +11,7 @@ import timer, {
   timerEmptyState,
 } from '../../redux/states/timer';
 import { useDispatch } from 'react-redux';
+import TimeList from './components/TimeList/TimeList';
 
 export interface TimerParams {
   sessionId: string;
@@ -57,7 +58,8 @@ const Timer: React.FC = () => {
         <TimerDisplay />
       </TimerSpace>
       <TimerUtilities>
-        <ScrambleSection></ScrambleSection> <div style={{ flexGrow: 1 }}></div>
+        <ScrambleSection />
+        <TimeList />
       </TimerUtilities>
     </TimerContainer>
   );

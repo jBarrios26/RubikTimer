@@ -56,6 +56,7 @@ export const timerSlice = createSlice({
     ) => {
       return { ...state, ...action.payload };
     },
+
     resetTimerSession: () => timerEmptyState,
   },
 });
